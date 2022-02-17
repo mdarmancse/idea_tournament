@@ -20,6 +20,7 @@
                 <ul id="sidebarnav">
                     <li class="nav-devider mt-0" style="margin-bottom: 5px"></li>
                     <li> <a href="{{url('/')}}" ><span> <i class="fas fa-home"></i> </span><span class="hide-menu">Home</span></a></li>
+                    <li> <a href="{{url('/idea')}}" ><span> <i class="fas fa-eye"></i> </span><span class="hide-menu">Idea</span></a></li>
 
 
                 </ul>
