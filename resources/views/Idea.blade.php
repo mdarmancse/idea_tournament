@@ -25,13 +25,22 @@
 
                  @endif
 
+                    <div class="countdown">
+                        <p id="timer">
 
+                            <span id="timer-mins"></span>
+                            <span id="timer-secs"></span>
+                            <input type="hidden" id="minutes" value="" />
+                            <input type="hidden" id="seconds" value=""/>
+                            <input type="hidden" id="tour_id" value=""/>
+                        </p>
+                    </div>
 
                 <table id="userDataTable" class="table table-striped table-sm table-bordered" cellspacing="0" width="100%">
 
                     <thead>
                     <tr>
-                        <th class="th-sm">ID</th>
+                        <th class="th-sm">Email </th>
                         <th class="th-sm">User Name</th>
                         <th class="th-sm">Idea</th>
 
@@ -46,6 +55,8 @@
                 </table>
 
             </div>
+
+
         </div>
     </div>
 
@@ -67,8 +78,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form  action="/ideaAdd" method="POST" class="m-5 loginForm">
-                    @csrf
+
                 <div class="modal-body mx-3">
 
 
@@ -84,10 +94,10 @@
                     <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">
                         Close
                     </button>
-                    <button type="submit" id="userAddConfirmBtn" class="btn btn-sm btn-success">Save</button>
+                    <button  id="userAddConfirmBtn" class="btn btn-sm btn-success" onclick="ideaAdd()">Save</button>
                 </div>
 
-                </form>
+
             </div>
         </div>
     </div>
@@ -98,8 +108,160 @@
 @endsection
 
 @section('script')
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         <script type="text/javascript">
+
+                setInterval(function(){
+                    let minutes = $("#minutes").val();
+                    let  seconds = $("#seconds").val();
+                    let  tour_id = $("#tour_id").val();
+                    if(tour_id != '') {
+                        if (minutes == '10' && seconds == '00') {
+                            axios.get("/get_end_time/4/" + tour_id)
+                                .then(function (response) {
+
+                                    console.log(response.data)
+
+                                    let data=response.data;
+
+                                    axios.post('/send-mail', {
+                                        data: data,
+                                        phase: '1st Phase',
+
+                                    }).then(function (response) {
+
+
+
+                                    })
+
+                                    swal("1st Phase", "4 winners", "success");
+                                })
+
+                        }
+
+                        if (minutes == '05' && seconds == '00') {
+                            axios.get("/get_end_time/2/"+tour_id)
+                                .then(function (response) {
+                                    console.log(response.data)
+                                    let data=response.data;
+
+                                    axios.post('/send-mail', {
+                                        data: data,
+                                        phase: '2nd Phase',
+
+                                    }).then(function (response) {
+
+
+
+                                    })
+                                    swal("2nd Phase", "2 winners", "success");
+                                })
+
+                        }
+
+                        if (minutes == '00' && seconds == '00') {
+                            axios.get("/get_end_time/1/"+tour_id)
+                                .then(function (response) {
+                                    console.log(response.data)
+                                    let data=response.data;
+
+                                    axios.post('/send-mail', {
+                                        data: data,
+                                        phase: 'Final Phase',
+
+                                    }).then(function (response) {
+
+
+
+                                    })
+                                    swal("Final Phase", "1 winners", "success");
+                                })
+
+                        }
+                    }
+                }, 1000);
+
+
+
+
             getUsersData();
+
+            function get_alert() {
+
+                axios.get("/ideaCount")
+                    .then(function (response) {
+
+                        alert(response.data)
+
+                    })
+
+            }
+
+            function ideaAdd() {
+
+                axios.post('/ideaAdd', {
+                    idea: $('#idea').val(),
+
+                })
+                    .then(function (response) {
+                        $('#addModal').modal('hide')
+                        getUsersData()
+                        toastr.success('Idea added')
+
+                        console.log(response.data)
+
+                        if (response.data.count == 8){
+                            swal("Tournament Start", "", "success");
+                            $("#tour_id").val(response.data.tour_id);
+                            var endTime = new Date().getTime() + 15 * 60 * 1000;
+
+                            var timer = setInterval(function() {
+
+                                let now = new Date().getTime();
+                                let t = endTime - now;
+
+
+
+
+
+                                if (t >= 0) {
+
+
+                                    let mins = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60));
+                                    let secs = Math.floor((t % (1000 * 60)) / 1000);
+
+
+
+                                    $("#minutes").val(("0"+mins).slice(-2));
+                                    $("#seconds").val(("0"+secs).slice(-2));
+                                    document.getElementById("timer-mins").innerHTML = ("0"+mins).slice(-2) +
+                                        "<span class='label'>MIN(S)</span>";
+
+                                    document.getElementById("timer-secs").innerHTML = ("0"+secs).slice(-2) +
+                                        "<span class='label'>SEC(S)</span>";
+
+
+
+
+
+
+                                } else {
+
+                                    document.getElementById("timer").innerHTML = "The Tournament is over!";
+
+                                }
+
+                            }, 1000);
+                        }
+                    })
+                    .catch(function (error) {
+                        getUsersData();
+                        toastr.error('Something went wrong')
+                    });
+
+            }
+
+
 
 
             function getUsersData() {
@@ -116,14 +278,14 @@
                             $('#user_table').empty();
                             var jsonData = response.data;
 
-                            console.log(jsonData)
+                            // console.log(jsonData)
                             // $.each(jsonData, function (i, item) {   })
                             for (var i = 0; i < jsonData.length; i++) {
 
                                 // var obj = jsonData[i];
                                  //console.log(obj.id);
                                 $('<tr>').html(
-                                    "<td>" + jsonData[i].id + "</td>" +
+                                    "<td>" + jsonData[i].user[0].email + "</td>" +
                                     "<td>" + jsonData[i].user[0].name + "</td>" +
                                     "<td>" + jsonData[i].idea + "</td>"
 
@@ -141,15 +303,12 @@
 
             }
 
-     ;
-
-
-
-
-
             $('#addFormBtn').click(function () {
                 $('#addModal').modal('show');
+                $('#idea').val('')
             })
+
+
 
 
 

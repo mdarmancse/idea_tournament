@@ -6,7 +6,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\AdminModel;
 use Illuminate\Support\Facades\Hash;
-
+use App\Mail\TestUserMail;
+use Mail;
 class HomeController extends Controller
 {
        //ADMIN
@@ -23,11 +24,7 @@ class HomeController extends Controller
     }
 
 
-    function getUserData()
-    {
-        $result = AdminModel::orderBy('id','desc')->get();
-        return $result;
-    }
+
     function userAdd(Request $request)
     {
         $name=$request->input('name');
@@ -45,5 +42,44 @@ class HomeController extends Controller
         }
 
     }
+
+    function getUserData()
+    {
+        $result = AdminModel::orderBy('id','desc')->get();
+        return $result;
+    }
+    public function sendMail(Request $request)
+    {
+
+       $data= $request->data;
+
+        foreach ($data as $dt){
+
+           $e= AdminModel::where('id',$dt['user_id'])->get();
+
+            foreach($e as $key => $value){
+
+
+                if (!empty($value['email'])) {
+                    $details = [
+                        'subject' => 'Idea Tournament',
+                        'phase' => $request->phase,
+                    ];
+
+                    Mail::to($value['email'])->send(new TestUserMail($details));
+                }
+            }
+
+        }
+
+
+
+
+
+
+
+        return response()->json(['done']);
+    }
+
 
 }

@@ -39,6 +39,7 @@
 <script type="text/javascript" src="{{asset('js/custom.js')}}"></script>
 <script type="text/javascript" src="{{asset('p/jquery.printPage.js')}}"></script>
 
+
 @yield('script')
 
 </body>
