@@ -32,10 +32,11 @@
                             <span id="timer-secs"></span>
                             <input type="hidden" id="minutes" value="" />
                             <input type="hidden" id="seconds" value=""/>
-                            <input type="hidden" id="tour_id" value=""/>
+{{--                            <input type="text" id="tour_id" value=""/>--}}
 
                             @if($latest_tour)
                             <input type="hidden" id="end_time" value="{{$latest_tour->end_time}}"/>
+                            <input type="hidden" id="tour_id" value="{{$latest_tour->tour_id}}"/>
                             @endif
                         </p>
                     </div>
@@ -178,10 +179,9 @@
                 setInterval(function(){
                     let minutes = $("#minutes").val();
                     let  seconds = $("#seconds").val();
-                    let  tour_id = $("#tour_id").val();
-                    if(tour_id != '') {
+                    if(t_id != '') {
                         if (minutes == '10' && seconds == '00') {
-                            axios.get("/get_end_time/4/" + tour_id)
+                            axios.get("/get_end_time/4/" + t_id)
                                 .then(function (response) {
 
                                     console.log(response.data)
@@ -204,7 +204,7 @@
                         }
 
                         if (minutes == '05' && seconds == '00') {
-                            axios.get("/get_end_time/2/"+tour_id)
+                            axios.get("/get_end_time/2/"+t_id)
                                 .then(function (response) {
                                     console.log(response.data)
                                     let data=response.data;
@@ -224,7 +224,7 @@
                         }
 
                         if (minutes == '00' && seconds == '00') {
-                            axios.get("/get_end_time/1/"+tour_id)
+                            axios.get("/get_end_time/1/"+t_id)
                                 .then(function (response) {
                                     console.log(response.data)
                                     let data=response.data;
