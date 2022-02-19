@@ -11,16 +11,16 @@
                 <div class="card">
                     <div class="card-body">
                         <h3 class="count card-title">TOUR-{{$at->tour_id}}</h3>
-                        <h3 class="count card-text" id="abx">
-                            <span id="timer-mins"></span>
-                            <span id="timer-secs"></span>
+                        <h3 class="count card-text" id="abx_{{$at->tour_id}}">
+                            <span class="label"  id="timer-mins_{{$at->tour_id}}"></span>
+                            <span class="label" id="timer-secs_{{$at->tour_id}}"></span>
                         </h3>
 
                             <input type="hidden" id="minutes_{{$at->tour_id}}" value=""/>
                             <input type="hidden" id="seconds_{{$at->tour_id}}" value=""/>
                             <input type="hidden" id="end_time_{{$at->tour_id}}" value="{{$at->end_time}}"/>
                             <input type="hidden" id="tour_id_{{$at->tour_id}}" value="{{$at->tour_id}}"/>
-                        <button id="see_time_{{$at->tour_id}}" onclick="see_time({{$at->tour_id}})" type="button" class="mt-3 btn btn-sm btn-primary">See Remaining Time</button>
+                        <button id="see_time_{{$at->tour_id}}" onclick="see_time({{$at->tour_id}})" type="button" class="mt-3 btn btn-sm btn-primary">Remaining Time</button>
 
                     </div>
                 </div>
@@ -153,7 +153,9 @@
                 // alert(sl)
 
                 var endTimerrr=parseFloat($('#end_time_'+sl).val());
-                var tour_id=parseFloat($('#tour_id'+sl).val());
+                var tour_id=parseFloat($('#tour_id_'+sl).val());
+
+               // alert(tour_id)
 
                 setInterval(function(){
                     let minutes = $("#minutes_"+sl).val();
@@ -164,7 +166,7 @@
                             axios.get("/get_end_time/4/" + tour_id)
                                 .then(function (response) {
 
-                                    console.log(response.data)
+                                    //console.log(response.data)
 
                                     let data=response.data;
 
@@ -186,7 +188,7 @@
                         if (minutes == '05' && seconds == '00') {
                             axios.get("/get_end_time/2/"+tour_id)
                                 .then(function (response) {
-                                    console.log(response.data)
+                                    //console.log(response.data)
                                     let data=response.data;
 
                                     axios.post('/send-mail', {
@@ -243,10 +245,10 @@
 
                         $("#minutes_"+sl).val(("0"+mins).slice(-2));
                         $("#seconds_"+sl).val(("0"+secs).slice(-2));
-                        document.getElementById("timer-mins").innerHTML = ("0"+mins).slice(-2) +
+                        document.getElementById("timer-mins_"+sl).innerHTML = ("0"+mins).slice(-2) +
                             "<span class='label'>MIN(S)</span>";
 
-                        document.getElementById("timer-secs").innerHTML = ("0"+secs).slice(-2) +
+                        document.getElementById("timer-secs_"+sl).innerHTML = ("0"+secs).slice(-2) +
                             "<span class='label'>SEC(S)</span>";
 
 
@@ -255,7 +257,7 @@
 
 
                     } else {
-                        document.getElementById("abx").innerHTML = "The  Tournament is over!";
+                        document.getElementById("abx_"+sl).innerHTML = "The  Tournament is over!";
 
                         axios.get('/change_status/'+tour_id)
                             .then(function (response) {
