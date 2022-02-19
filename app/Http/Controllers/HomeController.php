@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\TourModel;
 use Illuminate\Http\Request;
 use App\AdminModel;
 use Illuminate\Support\Facades\Hash;
@@ -15,9 +16,13 @@ class HomeController extends Controller
         $user=session('user');
 
         $user_type=AdminModel::where('email',$user)->first()->user_type;
+        $latest_tour = TourModel::where('status',1)->latest()->first();
+        $all_tour = TourModel::all();
 
         $data=[
-          'user_type' =>$user_type
+          'user_type' =>$user_type,
+          'latest_tour' =>$latest_tour,
+          'all_tour' =>$all_tour,
         ];
 
         return view('Home',$data);

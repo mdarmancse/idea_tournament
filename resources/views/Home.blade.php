@@ -1,7 +1,33 @@
 @extends('layout.app')
 @section('content')
 
+    <div class="container">
+        <div class="row">
 
+
+            @foreach($all_tour as $at )
+
+            <div class="col-md-4 p-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="count card-title">TOUR-{{$at->tour_id}}</h3>
+                        <h3 class="count card-text" id="abx">
+                            <span id="timer-mins"></span>
+                            <span id="timer-secs"></span>
+                        </h3>
+
+                            <input type="hidden" id="minutes_{{$at->tour_id}}" value=""/>
+                            <input type="hidden" id="seconds_{{$at->tour_id}}" value=""/>
+                            <input type="hidden" id="end_time_{{$at->tour_id}}" value="{{$at->end_time}}"/>
+                            <input type="hidden" id="tour_id_{{$at->tour_id}}" value="{{$at->tour_id}}"/>
+                        <button id="see_time_{{$at->tour_id}}" onclick="see_time({{$at->tour_id}})" type="button" class="mt-3 btn btn-sm btn-primary">See Remaining Time</button>
+
+                    </div>
+                </div>
+            </div>
+            @endforeach
+
+        </div>
 
     <div id="mainDiv" class="container d-none">
 
@@ -121,6 +147,133 @@
 
 @section('script')
         <script type="text/javascript">
+
+            function see_time(sl) {
+
+                // alert(sl)
+
+                var endTimerrr=parseFloat($('#end_time_'+sl).val());
+                var tour_id=parseFloat($('#tour_id'+sl).val());
+
+                setInterval(function(){
+                    let minutes = $("#minutes_"+sl).val();
+                    let  seconds = $("#seconds_"+sl).val();
+
+                    if(tour_id != '') {
+                        if (minutes == '10' && seconds == '00') {
+                            axios.get("/get_end_time/4/" + tour_id)
+                                .then(function (response) {
+
+                                    console.log(response.data)
+
+                                    let data=response.data;
+
+                                    axios.post('/send-mail', {
+                                        data: data,
+                                        phase: '1st Phase',
+
+                                    }).then(function (response) {
+
+
+
+                                    })
+
+                                    swal("1st Phase", "4 winners", "success");
+                                })
+
+                        }
+
+                        if (minutes == '05' && seconds == '00') {
+                            axios.get("/get_end_time/2/"+tour_id)
+                                .then(function (response) {
+                                    console.log(response.data)
+                                    let data=response.data;
+
+                                    axios.post('/send-mail', {
+                                        data: data,
+                                        phase: '2nd Phase',
+
+                                    }).then(function (response) {
+
+
+
+                                    })
+                                    swal("2nd Phase", "2 winners", "success");
+                                })
+
+                        }
+
+                        if (minutes == '00' && seconds == '00') {
+                            axios.get("/get_end_time/1/"+tour_id)
+                                .then(function (response) {
+                                    console.log(response.data)
+                                    let data=response.data;
+
+                                    axios.post('/send-mail', {
+                                        data: data,
+                                        phase: 'Final Phase',
+
+                                    }).then(function (response) {
+
+
+
+                                    })
+                                    swal("Final Phase", "1 winners", "success");
+                                })
+
+                        }
+                    }
+                }, 1000);
+                var timer = setInterval(function() {
+
+                    let now = new Date().getTime();
+                    let t = endTimerrr - now;
+
+
+
+
+
+                    if (t >= 0) {
+
+
+                        let mins = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60));
+                        let secs = Math.floor((t % (1000 * 60)) / 1000);
+
+
+
+                        $("#minutes_"+sl).val(("0"+mins).slice(-2));
+                        $("#seconds_"+sl).val(("0"+secs).slice(-2));
+                        document.getElementById("timer-mins").innerHTML = ("0"+mins).slice(-2) +
+                            "<span class='label'>MIN(S)</span>";
+
+                        document.getElementById("timer-secs").innerHTML = ("0"+secs).slice(-2) +
+                            "<span class='label'>SEC(S)</span>";
+
+
+
+
+
+
+                    } else {
+                        document.getElementById("abx").innerHTML = "The  Tournament is over!";
+
+                        axios.get('/change_status/'+tour_id)
+                            .then(function (response) {
+
+                            })
+                            .catch(function (error) {
+
+                            })
+
+                    }
+
+                }, 1000);
+
+
+            }
+
+
+
             getUsersData();
 
 

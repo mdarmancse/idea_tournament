@@ -13,6 +13,7 @@ Route::get('/getIdeaData','idea_controller@getIdeaData')->middleware('logincheck
 Route::get('/idea','idea_controller@idea')->middleware('logincheck');
 Route::get('/ideaCount','idea_controller@ideaCount')->middleware('logincheck');
 Route::get('/get_end_time/{lm}/{tour_id}','idea_controller@get_end_time')->middleware('logincheck');
+Route::get('/change_status/{id}','idea_controller@change_status')->middleware('logincheck');
 Route::post('/ideaAdd','idea_controller@ideaAdd')->middleware('logincheck');
 
 

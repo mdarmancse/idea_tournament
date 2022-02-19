@@ -20,12 +20,12 @@
                 @endif
 
 
-                @if($user_type=='Admin')
+
                 <button id="addFormBtn" type="button" class="mt-3 btn btn-sm btn-danger">Add New</button>
 
-                 @endif
 
-                    <div class="countdown">
+
+                    <div class="countdown" >
                         <p id="timer">
 
                             <span id="timer-mins"></span>
@@ -33,8 +33,14 @@
                             <input type="hidden" id="minutes" value="" />
                             <input type="hidden" id="seconds" value=""/>
                             <input type="hidden" id="tour_id" value=""/>
+
+                            @if($latest_tour)
+                            <input type="hidden" id="end_time" value="{{$latest_tour->end_time}}"/>
+                            @endif
                         </p>
                     </div>
+
+
 
                 <table id="userDataTable" class="table table-striped table-sm table-bordered" cellspacing="0" width="100%">
 
@@ -110,6 +116,64 @@
 @section('script')
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         <script type="text/javascript">
+
+            var endTime = new Date().getTime() + 15 * 60 * 1000;
+
+            let  t_id = $("#tour_id").val();
+
+
+                    var endTimerrr=parseFloat($('#end_time').val());
+
+
+
+
+                    var timer = setInterval(function() {
+
+                        let now = new Date().getTime();
+                        let t = endTimerrr - now;
+
+
+
+
+
+                        if (t >= 0) {
+
+
+                            let mins = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60));
+                            let secs = Math.floor((t % (1000 * 60)) / 1000);
+
+
+
+                            $("#minutes").val(("0"+mins).slice(-2));
+                            $("#seconds").val(("0"+secs).slice(-2));
+                            document.getElementById("timer-mins").innerHTML = ("0"+mins).slice(-2) +
+                                "<span class='label'>MIN(S)</span>";
+
+                            document.getElementById("timer-secs").innerHTML = ("0"+secs).slice(-2) +
+                                "<span class='label'>SEC(S)</span>";
+
+
+
+
+
+
+                        } else {
+                            document.getElementById("timer").innerHTML = "The Last Tournament is over!";
+
+                            axios.get('/change_status/'+t_id)
+                                .then(function (response) {
+
+                                })
+                                .catch(function (error) {
+
+                                })
+
+                        }
+
+                    }, 1000);
+
+
+
 
                 setInterval(function(){
                     let minutes = $("#minutes").val();
@@ -197,69 +261,7 @@
 
             }
 
-            function ideaAdd() {
 
-                axios.post('/ideaAdd', {
-                    idea: $('#idea').val(),
-
-                })
-                    .then(function (response) {
-                        $('#addModal').modal('hide')
-                        getUsersData()
-                        toastr.success('Idea added')
-
-                        console.log(response.data)
-
-                        if (response.data.count == 8){
-                            swal("Tournament Start", "", "success");
-                            $("#tour_id").val(response.data.tour_id);
-                            var endTime = new Date().getTime() + 15 * 60 * 1000;
-
-                            var timer = setInterval(function() {
-
-                                let now = new Date().getTime();
-                                let t = endTime - now;
-
-
-
-
-
-                                if (t >= 0) {
-
-
-                                    let mins = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60));
-                                    let secs = Math.floor((t % (1000 * 60)) / 1000);
-
-
-
-                                    $("#minutes").val(("0"+mins).slice(-2));
-                                    $("#seconds").val(("0"+secs).slice(-2));
-                                    document.getElementById("timer-mins").innerHTML = ("0"+mins).slice(-2) +
-                                        "<span class='label'>MIN(S)</span>";
-
-                                    document.getElementById("timer-secs").innerHTML = ("0"+secs).slice(-2) +
-                                        "<span class='label'>SEC(S)</span>";
-
-
-
-
-
-
-                                } else {
-
-                                    document.getElementById("timer").innerHTML = "The Tournament is over!";
-
-                                }
-
-                            }, 1000);
-                        }
-                    })
-                    .catch(function (error) {
-                        getUsersData();
-                        toastr.error('Something went wrong')
-                    });
-
-            }
 
 
 
@@ -315,7 +317,37 @@
 
 
 
+            function ideaAdd() {
 
+                axios.post('/ideaAdd', {
+                    idea: $('#idea').val(),
+                    time:endTime
+
+                })
+                    .then(function (response) {
+                        $('#addModal').modal('hide')
+                        getUsersData()
+                        toastr.success('Idea added')
+
+                        console.log(response.data)
+
+                        if (response.data.count == 8){
+                            swal("Tournament Start", "", "success");
+
+
+                            $("#tour_id").val(response.data.tour_id);
+                            $("#end_time").val(response.data.end_time);
+
+
+                            window.location.reload()
+                        }
+                    })
+                    .catch(function (error) {
+                        getUsersData();
+                        toastr.error('Something went wrong')
+                    });
+
+            }
 
         </script>
 

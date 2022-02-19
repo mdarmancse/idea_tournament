@@ -14,10 +14,11 @@ class idea_controller extends Controller
 
         $user_type=AdminModel::where('email',$user)->first()->user_type;
 
-
+        $latest_tour = TourModel::where('status',1)->latest()->first();
 
         $data=[
             'user_type' =>$user_type,
+            'latest_tour' =>$latest_tour,
         ];
 
         return view('Idea',$data);
@@ -34,6 +35,13 @@ class idea_controller extends Controller
     {
 
         $result = IdeaModel::where(['tour_id'=>$tour_id,'status'=>2])->inRandomOrder()->limit($lm)->get();
+        return $result;
+    }
+
+    function change_status($id)
+    {
+
+        $result = TourModel::where('tour_id',$id)->update(['status'=>2]);
         return $result;
     }
 
@@ -54,6 +62,7 @@ class idea_controller extends Controller
 //     die();
 
         $idea=$request->input('idea');
+        $endT=$request->time;
         $user=session('user');
 
         $user_id=AdminModel::where('email',$user)->first()->id;
@@ -70,8 +79,10 @@ class idea_controller extends Controller
         if ($count == 8){
             $tour_id=date('Ymdhs');
             $data['tour_id']=$tour_id;
+            $data['end_time']=$endT;
 
-            TourModel::insert(['tour_id'=>$tour_id,'status' => 1,'end_time'=>$endTime]);
+
+            TourModel::insert(['tour_id'=>$tour_id,'status' => 1,'end_time'=>$endT]);
             IdeaModel::where('status',1)->update(['status'=>2,'tour_id'=>$tour_id]);
 
 
